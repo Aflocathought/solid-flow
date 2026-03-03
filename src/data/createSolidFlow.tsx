@@ -29,6 +29,7 @@ import {
   type NodePositionChange,
   panBy as panBySystem,
   type PanZoomInstance,
+  pointToRendererPoint,
   type SelectionRect,
   type SetCenterOptions,
   snapPosition,
@@ -256,7 +257,7 @@ export const createSolidFlow = <NodeType extends Node = Node, EdgeType extends E
       return {
         ...state,
         from: state.from,
-        to: state.to,
+        to: state.inProgress ? pointToRendererPoint(state.to, this.transform) : state.to,
       } as ConnectionState<InternalNode<NodeType>>;
     },
     get domNode() {
