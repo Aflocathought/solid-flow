@@ -1,4 +1,8 @@
-import type { ConnectionLineType as SystemConnectionLineType, Handle } from "@xyflow/system";
+import type {
+  ConnectionLineType as SystemConnectionLineType,
+  Handle,
+  Position,
+} from "@xyflow/system";
 import type { JSX } from "solid-js";
 
 import type { InternalNode, Node } from "./node";

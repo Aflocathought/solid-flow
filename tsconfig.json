@@ -6,14 +6,17 @@
     "skipLibCheck": true,
     "target": "ESNext",
     "module": "ESNext",
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "allowJs": true,
     "resolveJsonModule": true,
     "moduleResolution": "Bundler",
     "moduleDetection": "force",
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
-
     /* Strictness */
     "strict": true,
     "allowUnreachableCode": false,
@@ -22,16 +25,23 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-
     /* JSX */
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-
     /* Types */
-    "types": ["vite/client", "bun-types", "@testing-library/jest-dom"],
+    "types": [
+      "vite/client",
+      "@testing-library/jest-dom"
+    ],
     "paths": {
-      "~/*": ["./src/*"]
+      "~/*": [
+        "./src/*"
+      ]
     }
   },
-  "exclude": ["node_modules", "coverage", "dist"]
+  "exclude": [
+    "node_modules",
+    "coverage",
+    "dist"
+  ]
 }

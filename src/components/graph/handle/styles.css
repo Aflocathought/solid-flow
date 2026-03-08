@@ -11,14 +11,23 @@
 .solid-flow__handle {
   position: absolute;
   pointer-events: none;
-  min-width: 5px;
-  min-height: 5px;
+  --xy-handle-translate: translate(-50%, -50%);
+  --xy-handle-scale: 1;
+  min-width: 8px;
+  min-height: 8px;
 
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   background-color: var(--xy-handle-background-color, var(--xy-handle-background-color-default));
   border: 1px solid var(--xy-handle-border-color, var(--xy-handle-border-color-default));
   border-radius: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: var(--xy-handle-translate) scale(var(--xy-handle-scale));
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
 
   &.connectingfrom {
     pointer-events: all;
@@ -27,30 +36,89 @@
   &.connectionindicator {
     pointer-events: all;
     cursor: crosshair;
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: -9px;
+      border-radius: 999px;
+      pointer-events: auto;
+    }
+
+    &:hover,
+    &:focus-visible {
+      --xy-handle-scale: 1.5;
+
+      &::before {
+        animation: solid-flow-handle-pulse 1.7s ease-in-out infinite;
+      }
+
+      &::after {
+        content: "+";
+        font-size: 9px;
+        line-height: 1;
+        font-weight: 700;
+        opacity: 0.85;
+        color: var(--xy-handle-border-color, var(--xy-handle-border-color-default));
+        transform: translateY(-0.5px);
+        pointer-events: none;
+      }
+    }
+  }
+
+  &.connectingto,
+  &.valid {
+    --xy-handle-scale: 1.7;
+    box-shadow: 0 0 0 4px color-mix(in srgb, currentColor 24%, transparent);
+  }
+}
+
+@keyframes solid-flow-handle-pulse {
+  0% {
+    box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  35% {
+    box-shadow: 0 0 0 5px color-mix(in srgb, currentColor 24%, transparent);
+  }
+
+  65% {
+    box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  100% {
+    box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 8%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .solid-flow__handle.connectionindicator:hover::before,
+  .solid-flow__handle.connectionindicator:focus-visible::before {
+    animation: none;
   }
 }
 
 .solid-flow__handle-left {
   top: 50%;
   left: 0;
-  transform: translate(-50%, -50%);
+  --xy-handle-translate: translate(-50%, -50%);
 }
 
 .solid-flow__handle-right {
   top: 50%;
   right: 0;
-  transform: translate(50%, -50%);
+  --xy-handle-translate: translate(50%, -50%);
 }
 
 .solid-flow__handle-top {
   top: 0;
   left: 50%;
-  transform: translate(-50%, -50%);
+  --xy-handle-translate: translate(-50%, -50%);
 }
 
 .solid-flow__handle-bottom {
   top: auto;
   left: 50%;
   bottom: 0;
-  transform: translate(-50%, 50%);
+  --xy-handle-translate: translate(-50%, 50%);
 }

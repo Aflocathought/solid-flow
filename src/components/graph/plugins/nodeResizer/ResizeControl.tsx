@@ -46,6 +46,7 @@ type ResizeControlProps = NodeResizerSubProps & {
    * @example ResizeControlVariant.Handle, ResizeControlVariant.Line
    */
   readonly variant?: ResizeControlVariant;
+  readonly color?: string;
   readonly style?: JSX.CSSProperties;
 } & Omit<JSX.HTMLAttributes<HTMLDivElement>, "onResize" | "style">;
 

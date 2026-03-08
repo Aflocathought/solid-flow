@@ -2,6 +2,7 @@ export { A11y } from "./accessibility/page";
 export { AddNodeOnDrop } from "./add-node-on-drop/page";
 export { Backgrounds } from "./backgrounds/page";
 export { ColorMode } from "./color-mode/page";
+export { ComfyWorkflow } from "./comfy-workflow/page";
 export { CustomConnectionLine } from "./custom-connection-line/page";
 export { CustomNode } from "./custom-node/page";
 export { Dagre } from "./dagre/page";

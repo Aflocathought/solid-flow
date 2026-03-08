@@ -1,5 +1,5 @@
 import type { OnConnectEnd } from "@xyflow/system";
-import { createEffect, createSignal } from "solid-js";
+import { createSignal } from "solid-js";
 
 import {
   createEdgeStore,
@@ -7,11 +7,13 @@ import {
   type Edge,
   type Node,
   SolidFlow,
-  useNodeConnections,
   useSolidFlow,
 } from "~/index";
 
 export const AddNodeOnDropExample = () => {
+  const QUICK_ADD_DRAG_THRESHOLD = 6;
+  const QUICK_ADD_NODE_GAP_X = 220;
+
   const [nodes] = createNodeStore([
     {
       id: "0",
@@ -23,33 +25,84 @@ export const AddNodeOnDropExample = () => {
   const [edges] = createEdgeStore([]);
 
   const [connectingNodeId, setConnectingNodeId] = createSignal<string | null>("0");
+  const [connectStartPoint, setConnectStartPoint] = createSignal<{ x: number; y: number } | null>(
+    null,
+  );
 
   let idCounter = 1;
   const getId = () => `${idCounter++}`;
 
-  const { screenToFlowPosition, flowToScreenPosition, addNodes, addEdges } = useSolidFlow();
+  const { screenToFlowPosition, flowToScreenPosition, addNodes, addEdges, getNode } =
+    useSolidFlow();
 
-  const connections = useNodeConnections(() => ({ id: "0", handleType: "source" }));
+  const toClientPoint = (event: MouseEvent | TouchEvent) => {
+    if ("clientX" in event && "clientY" in event) {
+      return { x: event.clientX, y: event.clientY };
+    }
 
-  createEffect(() => {
-    console.log("Node connections:", connections());
-  });
+    if ("changedTouches" in event && event.changedTouches.length > 0) {
+      const touch = event.changedTouches[0];
+      return { x: touch.clientX, y: touch.clientY };
+    }
+
+    return null;
+  };
+
+  const createConnectedNodeNearSource = (sourceNodeId: string) => {
+    const sourceNode = getNode(sourceNodeId);
+    if (!sourceNode) return;
+
+    const id = getId();
+    const newNode: Node = {
+      id,
+      data: { label: `Node ${id}` },
+      position: {
+        x: sourceNode.position.x + QUICK_ADD_NODE_GAP_X,
+        y: sourceNode.position.y,
+      },
+      origin: [0.5, 0],
+    };
+
+    addNodes(newNode);
+    addEdges({
+      source: sourceNodeId,
+      target: id,
+      id: `${sourceNodeId}--${id}`,
+    });
+  };
 
   const handleConnectEnd: OnConnectEnd = (event) => {
     const nodeId = connectingNodeId();
-    if (!nodeId) return;
+    const endPoint = toClientPoint(event);
+
+    if (!nodeId || !endPoint) {
+      setConnectStartPoint(null);
+      setConnectingNodeId(null);
+      return;
+    }
+
+    const startPoint = connectStartPoint();
+    const distance =
+      startPoint === null
+        ? Number.POSITIVE_INFINITY
+        : Math.hypot(endPoint.x - startPoint.x, endPoint.y - startPoint.y);
+    const isClickLike = distance <= QUICK_ADD_DRAG_THRESHOLD;
+
+    if (isClickLike) {
+      createConnectedNodeNearSource(nodeId);
+      setConnectStartPoint(null);
+      setConnectingNodeId(null);
+      return;
+    }
 
     // See if connection landed inside the flow pane
     const targetIsPane = (event.target as Partial<Element> | null)?.classList?.contains(
       "solid-flow__pane",
     );
 
-    if (targetIsPane && "clientX" in event && "clientY" in event) {
+    if (targetIsPane) {
       const id = getId();
-      const position = {
-        x: event.clientX,
-        y: event.clientY,
-      };
+      const position = endPoint;
 
       const doubleTransformedPosition = flowToScreenPosition(screenToFlowPosition(position));
 
@@ -77,6 +130,9 @@ export const AddNodeOnDropExample = () => {
 
       addEdges(newEdge);
     }
+
+    setConnectStartPoint(null);
+    setConnectingNodeId(null);
   };
 
   return (
@@ -89,6 +145,13 @@ export const AddNodeOnDropExample = () => {
         onConnectStart={(_, { nodeId }) => {
           // Memorize the nodeId you start dragging a connection line from a node
           setConnectingNodeId(nodeId);
+
+          if (_.type === "touchstart" || _.type === "mousedown") {
+            const point = toClientPoint(_ as MouseEvent | TouchEvent);
+            setConnectStartPoint(point);
+          } else {
+            setConnectStartPoint(null);
+          }
         }}
         onConnectEnd={handleConnectEnd}
         style={{
